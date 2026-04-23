@@ -3,84 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Gaming Admin - Cloud Sync</title>
+    <title>Anna Gaming Cloud Pro v3.0</title>
     <style>
         :root { --bg: #050505; --card-bg: #0a0a0c; --accent: #00f2ff; --danger: #ff3344; --success: #00ff88; --text: #e0e0e0; --border: #1a1a1f; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .sync-status { font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { border: 1px solid var(--border); padding: 15px; border-radius: 12px; background: var(--card-bg); text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .sync-status { font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { border: 1px solid var(--border); padding: 20px; border-radius: 16px; background: var(--card-bg); cursor: pointer; transition: 0.3s; position: relative; }
         .card.active { border-color: var(--accent); background: #0d0d10; }
-        .timer { font-size: 2.2rem; font-weight: 900; margin: 10px 0; font-family: monospace; }
-        .cust-name { color: var(--accent); font-size: 0.85rem; font-weight: bold; display: block; min-height: 1.2em; text-transform: uppercase; }
-        .btn-test { background: #1a1a1f; color: #666; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; margin-top: 8px; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .modal-box { background: var(--card-bg); padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 8px; }
+        .card.alarm-active { animation: flash-red 0.8s infinite; border-color: var(--danger); }
+        @keyframes flash-red { 0%, 100% { background: var(--card-bg); } 50% { background: #1a0505; } }
+        .progress-container { width: 100%; height: 6px; background: #111; margin-top: 12px; border-radius: 3px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.5s linear; }
+        .timer { font-size: 3.5rem; font-weight: 900; margin: 15px 0; text-align: center; font-family: monospace; }
+        .cust-name-tag { color: var(--accent); font-weight: bold; text-align: center; display: block; margin-top: -10px; font-size: 0.9rem; text-transform: uppercase; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 20px; border: 1px solid #333; padding: 30px; position: relative; }
+        .modal-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #1a1a1f; }
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; }
+        .btn-prime { background: var(--accent); color: #000; width: 100%; height: 50px; text-transform: uppercase; }
+        .btn-danger { background: var(--danger); color: #fff; width: 100%; height: 50px; text-transform: uppercase; }
+        .total-counter { background: rgba(0, 255, 136, 0.05); color: var(--success); padding: 10px 20px; border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.2); font-weight: bold; }
     </style>
 </head>
 <body onload="init()">
 
     <div class="header">
         <div>
-            <h1 style="margin:0; font-size:1.4rem; color:var(--accent);">ANNA GAMING</h1>
+            <h1 style="margin:0; font-size:1.5rem; color:var(--accent);">ANNA GAMING CLOUD</h1>
             <div id="syncStatus" class="sync-status">● CONNECTING...</div>
-            <button class="btn-test" onclick="testConnection()">RE-TEST SYNC</button>
+            <button onclick="testConnection()" style="font-size:0.6rem; background:#111; color:#555; border:1px solid #222; padding:2px 5px; margin-top:5px;">RE-TEST SYNC</button>
         </div>
         <div style="text-align:right">
             <div style="font-size:0.6rem; color:#666;">DAILY REVENUE</div>
-            <div style="font-weight:bold; color:var(--success); font-size:1.2rem;">₹<span id="rev">0</span></div>
+            <div class="total-counter">₹<span id="dailyRevenue">0</span></div>
         </div>
     </div>
 
-    <div class="grid" id="grid"></div>
+    <div class="grid" id="gameGrid"></div>
 
-    <div class="modal" id="modal">
-        <div class="modal-box">
-            <h2 style="margin:0; color:var(--accent); font-size:1.2rem;">START UNIT</h2>
-            <input type="text" id="mName" placeholder="Customer Name">
-            <input type="number" id="mMins" value="60">
-            <button onclick="startSession()" style="background:var(--accent); color:#000; width:100%; padding:12px; border:none; font-weight:bold; border-radius:8px; cursor:pointer;">START SESSION</button>
-            <button onclick="closeModal()" style="background:none; color:#555; border:none; width:100%; margin-top:15px; cursor:pointer;">CANCEL</button>
+    <div class="modal-overlay" id="startModal">
+        <div class="modal-content">
+            <h2 id="startTitle" style="color:var(--accent)">START UNIT</h2>
+            <input type="text" id="custName" class="modal-input" placeholder="Customer Name">
+            <input type="number" id="startMins" class="modal-input" value="60">
+            <button class="btn-prime" onclick="confirmStart()">START SESSION</button>
+            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CANCEL</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-content">
+            <h2 id="detTitle" style="color:var(--accent); margin-bottom:5px;">UNIT DETAILS</h2>
+            <div id="detName" style="font-weight:bold; margin-bottom:15px;">Customer</div>
+            <div class="detail-row"><span>Coke (₹40)</span><input type="number" id="detCoke" style="width:50px; background:#000; color:#fff; border:1px solid #333;" onchange="updateSnacks()"></div>
+            <div class="detail-row"><span>Chips (₹20)</span><input type="number" id="detChips" style="width:50px; background:#000; color:#fff; border:1px solid #333;" onchange="updateSnacks()"></div>
+            <div class="detail-row"><span>Gaming Bill</span><span id="detRate">₹0</span></div>
+            <button class="btn-danger" onclick="confirmCheckout()" style="margin-top:20px;">CHECKOUT & SAVE</button>
+            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CLOSE</button>
         </div>
     </div>
 
     <script>
-        const SYNC_URL = "https://script.google.com/macros/s/AKfycbxknh20tM8Pg-huYELybvGUKDA82ii8f_WYnXS1QZ-9YXkY_CTlC6qvVWfQWliJWAhnKA/exec"; 
+        const SYNC_URL = "https://script.google.com/macros/s/AKfycbySdX1WjCT-GAs7TCZOv9Zlprq5R4ci5g7NbMgU1NPVKWw9LeF-M04yKqWzS8WH3_mVXw/exec";
         const currentDayKey = new Date().toLocaleDateString('en-CA');
-        let appData = { active: {}, revenue: 0 };
-        let selectedId = null;
+        const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg');
+        
+        let appData = { activeSessions: {}, revenue: 0, history: [] };
+        let activeUnitId = null;
 
         async function init() {
             await pull();
-            render();
-            setInterval(tick, 1000);
-            setInterval(pull, 6000); 
-        }
-
-        async function testConnection() {
-            try {
-                const res = await fetch(`${SYNC_URL}?key=test`);
-                const text = await res.text();
-                alert("Cloud Connection Success!");
-                pull();
-            } catch (e) {
-                alert("Connection Error: Check if Google Script is set to 'Anyone'");
-            }
+            renderGrid();
+            setInterval(updateTickers, 1000);
+            setInterval(pull, 8000); // Sync every 8 seconds
         }
 
         async function pull() {
             try {
-                const res = await fetch(`${SYNC_URL}?key=anna_${currentDayKey}`);
+                const res = await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}`);
                 const data = await res.json();
-                if (data.active !== undefined) {
+                if (data.activeSessions) {
                     appData = data;
-                    render();
+                    renderGrid();
                     document.getElementById('syncStatus').innerText = "● ONLINE (SYNCED)";
                     document.getElementById('syncStatus').style.color = "var(--success)";
                 }
-            } catch (e) { 
+            } catch (e) {
                 document.getElementById('syncStatus').innerText = "● OFFLINE (RETRYING)";
                 document.getElementById('syncStatus').style.color = "var(--danger)";
             }
@@ -88,58 +99,90 @@
 
         async function push() {
             const content = encodeURIComponent(JSON.stringify(appData));
-            await fetch(`${SYNC_URL}?key=anna_${currentDayKey}&content=${content}`);
+            await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
         }
 
-        function render() {
-            const container = document.getElementById('grid');
+        function renderGrid() {
+            const container = document.getElementById('gameGrid');
             container.innerHTML = "";
-            for (let i = 1; i <= 6; i++) {
-                const s = appData.active[i];
+            for (let id = 1; id <= 6; id++) {
+                const s = appData.activeSessions[id];
                 container.innerHTML += `
-                    <div class="card ${s ? 'active' : ''}" onclick="handleClick(${i})">
-                        <div style="font-size:0.7rem; color:#444;">UNIT 0${i}</div>
-                        <div class="timer" id="t-${i}">00:00</div>
-                        <span class="cust-name">${s ? s.name : 'OPEN'}</span>
+                    <div class="card ${s ? 'active' : ''}" id="card-${id}" onclick="handleUnitClick(${id})">
+                        <div style="font-weight:bold; color:#555;">UNIT 0${id}</div>
+                        <div class="progress-container"><div class="progress-bar" id="bar-${id}"></div></div>
+                        <div class="timer" id="display-${id}">00:00</div>
+                        <span class="cust-name-tag">${s ? s.name : 'AVAILABLE'}</span>
                     </div>`;
             }
-            document.getElementById('rev').innerText = appData.revenue;
+            document.getElementById('dailyRevenue').innerText = appData.revenue;
         }
 
-        function handleClick(id) {
-            selectedId = id;
-            if (appData.active[id]) {
-                if(confirm("End Session for Unit " + id + "?")) {
-                    appData.revenue += 150; 
-                    delete appData.active[id];
-                    render(); push();
-                }
-            } else { document.getElementById('modal').style.display = 'flex'; }
-        }
-
-        async function startSession() {
-            const name = document.getElementById('mName').value.trim();
-            const mins = document.getElementById('mMins').value;
-            if (!name) return;
-            appData.active[selectedId] = { name, end: Date.now() + (mins * 60000) };
-            closeModal(); render(); await push();
-        }
-
-        function tick() {
-            for (let i in appData.active) {
-                const diff = appData.active[i].end - Date.now();
-                const el = document.getElementById(`t-${i}`);
-                if (el) {
-                    if (diff <= 0) el.innerText = "00:00";
-                    else {
-                        const m = Math.floor(diff / 60000);
-                        const s = Math.floor((diff % 60000) / 1000);
-                        el.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                    }
-                }
+        function handleUnitClick(id) {
+            activeUnitId = id;
+            if (appData.activeSessions[id]) {
+                const s = appData.activeSessions[id];
+                document.getElementById('detName').innerText = s.name;
+                document.getElementById('detCoke').value = s.coke || 0;
+                document.getElementById('detChips').value = s.chips || 0;
+                document.getElementById('detRate').innerText = "₹" + s.rate;
+                document.getElementById('detailModal').style.display = 'flex';
+            } else {
+                document.getElementById('startModal').style.display = 'flex';
             }
         }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        function confirmStart() {
+            const name = document.getElementById('custName').value.trim();
+            const mins = parseInt(document.getElementById('startMins').value);
+            if (!name) return;
+            appData.activeSessions[activeUnitId] = {
+                name, startTime: Date.now(), endTime: Date.now() + (mins * 60000),
+                totalDuration: mins * 60000, rate: 150, coke: 0, chips: 0
+            };
+            closeModals(); renderGrid(); push();
+        }
+
+        function updateSnacks() {
+            const s = appData.activeSessions[activeUnitId];
+            s.coke = parseInt(document.getElementById('detCoke').value) || 0;
+            s.chips = parseInt(document.getElementById('detChips').value) || 0;
+            push();
+        }
+
+        function confirmCheckout() {
+            const s = appData.activeSessions[activeUnitId];
+            const total = s.rate + (s.coke * 40) + (s.chips * 20);
+            if(confirm("Collect ₹" + total + "?")) {
+                appData.revenue += total;
+                delete appData.activeSessions[activeUnitId];
+                renderGrid(); push(); closeModals();
+            }
+        }
+
+        function updateTickers() {
+            let alarm = false;
+            for (let id in appData.activeSessions) {
+                const s = appData.activeSessions[id];
+                const diff = s.endTime - Date.now();
+                const display = document.getElementById(`display-${id}`);
+                const bar = document.getElementById(`bar-${id}`);
+                const card = document.getElementById(`card-${id}`);
+
+                if (diff <= 0) {
+                    display.innerText = "00:00"; bar.style.width = "100%";
+                    card.classList.add('alarm-active'); alarm = true;
+                } else {
+                    const m = Math.floor(diff / 60000); const s_sec = Math.floor((diff % 60000) / 1000);
+                    display.innerText = `${m}:${s_sec < 10 ? '0' : ''}${s_sec}`;
+                    bar.style.width = ((Date.now() - s.startTime) / s.totalDuration * 100) + "%";
+                }
+            }
+            if(alarm) alarmSound.play().catch(()=>{}); else { alarmSound.pause(); alarmSound.currentTime = 0; }
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
+        async function testConnection() { try { await fetch(`${SYNC_URL}?key=test`); alert("Cloud Active!"); } catch(e) { alert("Error connecting!"); }}
     </script>
 </body>
 </html>
