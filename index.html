@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Gaming Sync v3.5</title>
+    <title>Anna Gaming Admin - Cloud Sync</title>
     <style>
         :root { --bg: #050505; --card-bg: #0a0a0c; --accent: #00f2ff; --danger: #ff3344; --success: #00ff88; --text: #e0e0e0; --border: #1a1a1f; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .logo { font-weight: 900; font-size: 1.4rem; color: var(--accent); margin: 0; }
-        #syncStatus { font-size: 0.75rem; font-weight: bold; margin-top: 5px; display: block; }
+        .sync-status { font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .card { border: 1px solid var(--border); padding: 15px; border-radius: 12px; background: var(--card-bg); text-align: center; position: relative; cursor: pointer; transition: 0.2s; }
+        .card { border: 1px solid var(--border); padding: 15px; border-radius: 12px; background: var(--card-bg); text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
         .card.active { border-color: var(--accent); background: #0d0d10; }
         .timer { font-size: 2.2rem; font-weight: 900; margin: 10px 0; font-family: monospace; }
         .cust-name { color: var(--accent); font-size: 0.85rem; font-weight: bold; display: block; min-height: 1.2em; text-transform: uppercase; }
-        .btn-prime { background: var(--accent); color: #000; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; border: none; margin-top: 10px; cursor: pointer; }
+        .btn-test { background: #1a1a1f; color: #666; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; margin-top: 8px; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100; }
-        .modal-box { background: var(--card-bg); padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 8px; font-size: 1rem; }
+        .modal-box { background: var(--card-bg); padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; border: 1px solid #333; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; color: #fff; box-sizing: border-box; border-radius: 8px; }
     </style>
 </head>
 <body onload="init()">
 
     <div class="header">
         <div>
-            <h1 class="logo">ANNA GAMING</h1>
-            <span id="syncStatus">● CONNECTING...</span>
+            <h1 style="margin:0; font-size:1.4rem; color:var(--accent);">ANNA GAMING</h1>
+            <div id="syncStatus" class="sync-status">● CONNECTING...</div>
+            <button class="btn-test" onclick="testConnection()">RE-TEST SYNC</button>
         </div>
         <div style="text-align:right">
-            <div style="font-size:0.7rem; color:#666; letter-spacing: 1px;">TOTAL REVENUE</div>
-            <div style="font-weight:bold; color:var(--success); font-size: 1.2rem;">₹<span id="rev">0</span></div>
+            <div style="font-size:0.6rem; color:#666;">DAILY REVENUE</div>
+            <div style="font-weight:bold; color:var(--success); font-size:1.2rem;">₹<span id="rev">0</span></div>
         </div>
     </div>
 
@@ -38,12 +38,10 @@
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <h2 id="mTitle" style="margin-top:0; color:var(--accent);">START SESSION</h2>
-            <label style="font-size:0.7rem; color:#666;">CUSTOMER NAME</label>
-            <input type="text" id="mName" placeholder="Enter Name">
-            <label style="font-size:0.7rem; color:#666;">MINUTES</label>
+            <h2 style="margin:0; color:var(--accent); font-size:1.2rem;">START UNIT</h2>
+            <input type="text" id="mName" placeholder="Customer Name">
             <input type="number" id="mMins" value="60">
-            <button class="btn-prime" onclick="startSession()">START UNIT</button>
+            <button onclick="startSession()" style="background:var(--accent); color:#000; width:100%; padding:12px; border:none; font-weight:bold; border-radius:8px; cursor:pointer;">START SESSION</button>
             <button onclick="closeModal()" style="background:none; color:#555; border:none; width:100%; margin-top:15px; cursor:pointer;">CANCEL</button>
         </div>
     </div>
@@ -58,7 +56,18 @@
             await pull();
             render();
             setInterval(tick, 1000);
-            setInterval(pull, 5000); 
+            setInterval(pull, 6000); 
+        }
+
+        async function testConnection() {
+            try {
+                const res = await fetch(`${SYNC_URL}?key=test`);
+                const text = await res.text();
+                alert("Cloud Connection Success!");
+                pull();
+            } catch (e) {
+                alert("Connection Error: Check if Google Script is set to 'Anyone'");
+            }
         }
 
         async function pull() {
@@ -68,28 +77,18 @@
                 if (data.active !== undefined) {
                     appData = data;
                     render();
-                    const status = document.getElementById('syncStatus');
-                    status.innerText = "● ONLINE (SYNCED)";
-                    status.style.color = "var(--success)";
+                    document.getElementById('syncStatus').innerText = "● ONLINE (SYNCED)";
+                    document.getElementById('syncStatus').style.color = "var(--success)";
                 }
             } catch (e) { 
-                document.getElementById('syncStatus').innerText = "● OFFLINE (RETRYING...)";
+                document.getElementById('syncStatus').innerText = "● OFFLINE (RETRYING)";
                 document.getElementById('syncStatus').style.color = "var(--danger)";
             }
         }
 
         async function push() {
-            const status = document.getElementById('syncStatus');
-            status.innerText = "● SAVING...";
-            status.style.color = "var(--accent)";
             const content = encodeURIComponent(JSON.stringify(appData));
-            try {
-                await fetch(`${SYNC_URL}?key=anna_${currentDayKey}&content=${content}`);
-                status.innerText = "● ONLINE (SYNCED)";
-                status.style.color = "var(--success)";
-            } catch (e) {
-                status.innerText = "● SYNC ERROR";
-            }
+            await fetch(`${SYNC_URL}?key=anna_${currentDayKey}&content=${content}`);
         }
 
         function render() {
@@ -99,12 +98,9 @@
                 const s = appData.active[i];
                 container.innerHTML += `
                     <div class="card ${s ? 'active' : ''}" onclick="handleClick(${i})">
-                        <div style="font-size:0.7rem; color:#444; font-weight:bold;">UNIT 0${i}</div>
+                        <div style="font-size:0.7rem; color:#444;">UNIT 0${i}</div>
                         <div class="timer" id="t-${i}">00:00</div>
-                        <span class="cust-name">${s ? s.name : 'AVAILABLE'}</span>
-                        <button class="btn-prime" style="font-size:0.7rem; padding:8px; background:${s ? 'var(--danger)' : 'var(--accent)'}; color:${s ? '#fff' : '#000'}">
-                            ${s ? 'END SESSION' : 'OPEN UNIT'}
-                        </button>
+                        <span class="cust-name">${s ? s.name : 'OPEN'}</span>
                     </div>`;
             }
             document.getElementById('rev').innerText = appData.revenue;
@@ -112,47 +108,38 @@
 
         function handleClick(id) {
             selectedId = id;
-            if (appData.active[id]) checkout();
-            else document.getElementById('modal').style.display = 'flex';
+            if (appData.active[id]) {
+                if(confirm("End Session for Unit " + id + "?")) {
+                    appData.revenue += 150; 
+                    delete appData.active[id];
+                    render(); push();
+                }
+            } else { document.getElementById('modal').style.display = 'flex'; }
         }
 
         async function startSession() {
             const name = document.getElementById('mName').value.trim();
             const mins = document.getElementById('mMins').value;
-            if (!name) return alert("Please enter a name");
+            if (!name) return;
             appData.active[selectedId] = { name, end: Date.now() + (mins * 60000) };
             closeModal(); render(); await push();
         }
 
-        async function checkout() {
-            if (confirm("End session for Unit 0" + selectedId + "?")) {
-                appData.revenue += 150; 
-                delete appData.active[selectedId];
-                render(); await push();
-            }
-        }
-
         function tick() {
-            for (let iIn in appData.active) {
-                const diff = appData.active[iIn].end - Date.now();
-                const el = document.getElementById(`t-${iIn}`);
-                if (!el) continue;
-                if (diff <= 0) {
-                    el.innerText = "00:00";
-                    el.style.color = "var(--danger)";
-                } else {
-                    const m = Math.floor(diff / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
-                    el.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                    el.style.color = "var(--text)";
+            for (let i in appData.active) {
+                const diff = appData.active[i].end - Date.now();
+                const el = document.getElementById(`t-${i}`);
+                if (el) {
+                    if (diff <= 0) el.innerText = "00:00";
+                    else {
+                        const m = Math.floor(diff / 60000);
+                        const s = Math.floor((diff % 60000) / 1000);
+                        el.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                    }
                 }
             }
         }
-
-        function closeModal() { 
-            document.getElementById('modal').style.display = 'none'; 
-            document.getElementById('mName').value = "";
-        }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
