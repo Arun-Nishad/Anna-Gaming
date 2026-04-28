@@ -3,77 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Gaming Cloud Pro v4.3</title>
+    <title>Anna Gaming Pro v4.5</title>
     <style>
         :root { --bg: #050505; --card-bg: #0a0a0c; --accent: #00f2ff; --danger: #ff3344; --success: #00ff88; --text: #e0e0e0; --border: #1a1a1f; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .sync-status { font-size: 0.7rem; font-weight: bold; }
-        
-        /* Fixed Game Grid Layout */
-        .game-area { width: 100%; margin-bottom: 20px; }
-        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
-        
-        /* Dashboard Bottom Layout */
+        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 768px) { .dashboard-row { grid-template-columns: 1fr; } }
-
-        .card { border: 1px solid var(--border); padding: 15px; border-radius: 16px; background: var(--card-bg); cursor: pointer; transition: 0.3s; position: relative; min-height: 120px; }
+        .card { border: 1px solid var(--border); padding: 20px; border-radius: 16px; background: var(--card-bg); cursor: pointer; transition: 0.3s; text-align: center; }
         .card.active { border-color: var(--accent); background: #0d0d10; }
         .card.alarm-active { animation: flash-red 0.8s infinite; border-color: var(--danger); }
         @keyframes flash-red { 0%, 100% { background: var(--card-bg); } 50% { background: #1a0505; } }
-        
-        .timer { font-size: 3rem; font-weight: 900; margin: 10px 0; text-align: center; font-family: monospace; }
-        .cust-name-tag { color: var(--accent); font-weight: bold; text-align: center; display: block; font-size: 0.85rem; text-transform: uppercase; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
-        .modal-content { background: var(--card-bg); width: 100%; max-width: 500px; border-radius: 20px; border: 1px solid #333; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
-        .modal-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; font-size: 1rem; }
-        
+        .timer { font-size: 2.5rem; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; }
+        .cust-name-tag { color: var(--accent); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; height: 1.2rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 25px; }
+        .modal-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
         button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px; transition: 0.2s; }
-        .btn-prime { background: var(--accent); color: #000; width: 100%; text-transform: uppercase; }
-        .btn-danger { background: var(--danger); color: #fff; width: 100%; text-transform: uppercase; }
-        .btn-opt { background: #1a1a1f; color: var(--accent); border: 1px solid #333; flex: 1; font-size: 0.8rem; margin: 2px; }
-        
-        .total-counter { background: rgba(0, 255, 136, 0.05); color: var(--success); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.2); font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #1a1a1f; }
-        .snack-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #000; margin-bottom: 8px; border-radius: 8px; border: 1px solid #222; }
+        .btn-prime { background: var(--accent); color: #000; width: 100%; }
+        .btn-opt { background: #1a1a1f; color: var(--accent); border: 1px solid #333; margin: 2px; font-size: 0.7rem; }
+        .total-counter { background: rgba(0, 255, 136, 0.1); color: var(--success); padding: 8px 15px; border-radius: 8px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th, td { padding: 8px; border-bottom: 1px solid #1a1a1f; text-align: left; }
+        .snack-item { display: flex; justify-content: space-between; padding: 10px; background: #000; margin-bottom: 5px; border-radius: 8px; border: 1px solid #222; }
     </style>
 </head>
 <body onload="init()">
 
     <div class="header">
         <div>
-            <h1 style="margin:0; font-size:1.3rem; color:var(--accent);">ANNA GAMING PRO</h1>
-            <div id="syncStatus" class="sync-status">● CONNECTING...</div>
+            <h1 style="margin:0; font-size:1.2rem; color:var(--accent);">ANNA GAMING PRO</h1>
+            <div id="syncStatus" style="font-size:0.7rem;">● STARTING...</div>
         </div>
         <div style="text-align:right">
-            <button onclick="fetchMonthlyHistory()" style="background:#111; color:var(--accent); border:1px solid #222; font-size:0.7rem; padding:5px 10px; margin-bottom:5px;">📜 HISTORY</button>
             <div class="total-counter">Total ₹<span id="dailyRevenue">0</span></div>
         </div>
     </div>
 
-    <div class="game-area">
-        <div class="grid-units" id="gameGrid"></div>
-    </div>
+    <div class="grid-units" id="gameGrid"></div>
 
     <div class="dashboard-row">
         <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
-            <h3 style="margin-top:0; font-size:0.9rem; color:var(--accent);">📊 TODAY'S SESSIONS</h3>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead><tr><th>Unit</th><th>Name</th><th>Bill</th></tr></thead>
-                    <tbody id="todayLog"></tbody>
-                </table>
-            </div>
+            <h3 style="margin:0 0 10px 0; font-size:0.8rem; color:var(--accent);">📊 RECENT SESSIONS</h3>
+            <table><tbody id="todayLog"></tbody></table>
         </div>
-
         <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3 style="margin:0; font-size:0.9rem; color:var(--success);">🍿 SNACK STOCK</h3>
-                <button onclick="addSnackType()" style="padding:4px 8px; font-size:0.6rem; background:var(--accent); color:#000;">+ ADD</button>
+                <h3 style="margin:0; font-size:0.8rem; color:var(--success);">🍿 SNACK STOCK</h3>
+                <button onclick="addSnackType()" style="padding:4px 8px; font-size:0.6rem; background:var(--accent); color:#000;">+ ADD NEW</button>
             </div>
             <div id="snackInventoryList"></div>
         </div>
@@ -81,38 +59,31 @@
 
     <div class="modal-overlay" id="startModal">
         <div class="modal-content">
-            <h2 style="color:var(--accent); margin-top:0;">START SESSION</h2>
+            <h2 style="color:var(--accent); margin:0 0 15px 0;">START UNIT</h2>
             <input type="text" id="custName" class="modal-input" placeholder="Customer Name">
             <div style="display:flex; gap:10px;">
-                <div style="flex:1"><small>Minutes</small><input type="number" id="startMins" class="modal-input" value="60"></div>
-                <div style="flex:1"><small>Price ₹</small><input type="number" id="startRate" class="modal-input" value="150"></div>
+                <div style="flex:1"><small>Mins</small><input type="number" id="startMins" class="modal-input" value="60"></div>
+                <div style="flex:1"><small>Rate ₹</small><input type="number" id="startRate" class="modal-input" value="150"></div>
             </div>
-            <button class="btn-prime" onclick="confirmStart()">START NOW</button>
+            <button class="btn-prime" onclick="confirmStart()">START SESSION</button>
             <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CANCEL</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="detailModal">
         <div class="modal-content">
-            <h2 id="detName" style="color:var(--accent); margin-top:0;">UNIT</h2>
-            <div style="display:flex; gap:8px; margin-bottom:15px;">
-                <button class="btn-opt" onclick="modifyTime(30)">+30 MIN</button>
-                <button class="btn-opt" onclick="modifyTime(-30)">-30 MIN</button>
-            </div>
-            <div style="background:#111; padding:12px; border-radius:10px; margin-bottom:15px;">
-                <small style="color:#888;">QUICK ADD SNACKS:</small>
-                <div id="snackSelectArea" style="display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;"></div>
-            </div>
+            <h2 id="detName" style="color:var(--accent); margin:0 0 15px 0;">UNIT</h2>
+            <small style="color:#666;">ADD SNACKS:</small>
+            <div style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0 20px 0;" id="snackSelectArea"></div>
             <div style="background:#000; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #222;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Game Charge:</span><span id="detRate">₹0</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>Snack Total:</span><span id="detSnacks" style="color:var(--accent)">₹0</span></div>
-                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.2rem; border-top:1px solid #333; pt:10px;">
-                    <span>Total Bill:</span><span id="detGrandTotal" style="color:var(--success)">₹0</span>
+                <div style="display:flex; justify-content:space-between;"><span>Game:</span><span id="detRate">₹0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Snacks:</span><span id="detSnacks" style="color:var(--accent)">₹0</span></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.2rem; border-top:1px solid #333; margin-top:10px; padding-top:10px; color:var(--success);">
+                    <span>TOTAL:</span><span id="detGrandTotal">₹0</span>
                 </div>
             </div>
-            <button class="btn-danger" onclick="confirmCheckout()">CHECKOUT & SAVE</button>
-            <button onclick="deleteSession()" style="background:none; color:#ff3344; width:100%; margin-top:10px; font-size:0.7rem;">DELETE SESSION</button>
-            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:5px;">CLOSE</button>
+            <button class="btn-prime" style="background:var(--danger); color:#fff;" onclick="confirmCheckout()">CHECKOUT</button>
+            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CLOSE</button>
         </div>
     </div>
 
@@ -124,8 +95,9 @@
         let appData = { activeSessions: {}, revenue: 0, history: [], snacks: [] };
         let activeUnitId = null;
 
-        async function init() {
-            await pull();
+        function init() {
+            renderGrid(); // Draw empty units immediately
+            pull();
             setInterval(updateTickers, 1000);
             setInterval(pull, 15000);
         }
@@ -134,48 +106,47 @@
             try {
                 const res = await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}`);
                 const data = await res.json();
-                if (data.activeSessions) {
+                
+                // If data exists, use it. If not, we keep the empty appData structure.
+                if (data && data.activeSessions) {
                     appData = data;
-                    if(!appData.snacks) appData.snacks = [];
-                    renderGrid();
-                    renderTodayLog();
-                    renderSnackInventory();
+                } else {
+                    // First time for today? Push blank data to clear Sheets
+                    push();
                 }
+                
+                renderGrid();
+                renderTodayLog();
+                renderSnackInventory();
                 document.getElementById('syncStatus').innerText = "● ONLINE";
                 document.getElementById('syncStatus').style.color = "var(--success)";
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "● OFFLINE";
-                document.getElementById('syncStatus').style.color = "var(--danger)";
+                document.getElementById('syncStatus').innerText = "● CONNECTED (NEW DAY)";
+                document.getElementById('syncStatus').style.color = "var(--accent)";
             }
-        }
-
-        async function push() {
-            const content = encodeURIComponent(JSON.stringify(appData));
-            await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
         }
 
         function renderGrid() {
             const container = document.getElementById('gameGrid');
-            container.innerHTML = "";
+            let html = "";
             for (let id = 1; id <= 6; id++) {
                 const s = appData.activeSessions[id];
-                container.innerHTML += `
+                html += `
                     <div class="card ${s ? 'active' : ''}" id="card-${id}" onclick="handleUnitClick(${id})">
-                        <div style="font-size:0.7rem; color:#555;">UNIT 0${id}</div>
+                        <div style="font-size:0.7rem; color:#555; margin-bottom:5px;">UNIT 0${id}</div>
+                        <div class="cust-name-tag">${s ? s.name : 'AVAILABLE'}</div>
                         <div class="timer" id="display-${id}">00:00</div>
-                        <span class="cust-name-tag">${s ? s.name : 'AVAILABLE'}</span>
                     </div>`;
             }
+            container.innerHTML = html;
             document.getElementById('dailyRevenue').innerText = appData.revenue;
         }
 
         function handleUnitClick(id) {
             activeUnitId = id;
             if (appData.activeSessions[id]) {
-                const s = appData.activeSessions[id];
-                document.getElementById('detName').innerText = "UNIT 0" + id + " - " + s.name;
                 updateDetailDisplay();
-                renderSnackSelection();
+                renderSnackButtons();
                 document.getElementById('detailModal').style.display = 'flex';
             } else {
                 document.getElementById('startModal').style.display = 'flex';
@@ -186,66 +157,18 @@
             const name = document.getElementById('custName').value.trim();
             const mins = parseInt(document.getElementById('startMins').value);
             const rate = parseInt(document.getElementById('startRate').value);
-            if (!name || isNaN(mins)) return;
+            if (!name) return;
             appData.activeSessions[activeUnitId] = { 
-                name, 
-                startTime: Date.now(), 
-                endTime: Date.now() + (mins * 60000), 
-                totalDuration: mins * 60000, 
-                rate: rate, 
-                hourlyRate: rate / (mins / 60), 
-                snackBill: 0 
+                name, startTime: Date.now(), endTime: Date.now() + (mins * 60000), 
+                totalDuration: mins * 60000, rate, hourlyRate: rate/(mins/60), snackBill: 0 
             };
             document.getElementById('custName').value = "";
             closeModals(); renderGrid(); push();
         }
 
-        function renderSnackInventory() {
-            const container = document.getElementById('snackInventoryList');
-            container.innerHTML = appData.snacks.map((s, idx) => `
-                <div class="snack-item">
-                    <span>${s.name} <small>(₹${s.price})</small></span>
-                    <div>
-                        <button onclick="updateSnackStock(${idx}, -1)" style="padding:2px 8px;">-</button>
-                        <span style="margin: 0 8px; font-weight:bold; color:var(--success);">${s.stock}</span>
-                        <button onclick="updateSnackStock(${idx}, 1)" style="padding:2px 8px;">+</button>
-                    </div>
-                </div>
-            `).join('') || '<p style="font-size:0.7rem; color:#555; text-align:center;">Empty</p>';
-        }
-
-        function renderSnackSelection() {
-            const container = document.getElementById('snackSelectArea');
-            container.innerHTML = appData.snacks.map((s, idx) => `
-                <button class="btn-opt" onclick="addSnackToUnit(${idx})">+ ${s.name}</button>
-            `).join('');
-        }
-
-        function addSnackToUnit(snackIdx) {
-            const snack = appData.snacks[snackIdx];
-            if (snack.stock <= 0) return alert("Out of stock!");
-            const session = appData.activeSessions[activeUnitId];
-            session.snackBill = (session.snackBill || 0) + snack.price;
-            snack.stock--;
-            updateDetailDisplay(); renderSnackInventory(); push();
-        }
-
-        function updateDetailDisplay() {
-            const s = appData.activeSessions[activeUnitId];
-            document.getElementById('detRate').innerText = "₹" + s.rate;
-            document.getElementById('detSnacks').innerText = "₹" + (s.snackBill || 0);
-            document.getElementById('detGrandTotal').innerText = "₹" + (s.rate + (s.snackBill || 0));
-        }
-
-        function confirmCheckout() {
-            const s = appData.activeSessions[activeUnitId];
-            const total = s.rate + (s.snackBill || 0);
-            if(confirm(`Collect ₹${total}?`)) {
-                appData.history.unshift({ unit: "U0" + activeUnitId, name: s.name, total: total });
-                appData.revenue += total;
-                delete appData.activeSessions[activeUnitId];
-                renderGrid(); renderTodayLog(); push(); closeModals();
-            }
+        async function push() {
+            const content = encodeURIComponent(JSON.stringify(appData));
+            await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
         }
 
         function updateTickers() {
@@ -255,35 +178,68 @@
                 const diff = s.endTime - Date.now();
                 const display = document.getElementById(`display-${id}`);
                 const card = document.getElementById(`card-${id}`);
+                if (!display) continue;
                 if (diff <= 0) { display.innerText = "00:00"; card.classList.add('alarm-active'); alarm = true; } 
-                else { 
-                    const m = Math.floor(diff / 60000); 
-                    const sec = Math.floor((diff % 60000) / 1000); 
-                    display.innerText = `${m}:${sec < 10 ? '0' : ''}${sec}`; 
-                    card.classList.remove('alarm-active'); 
+                else {
+                    const m = Math.floor(diff / 60000);
+                    const sec = Math.floor((diff % 60000) / 1000);
+                    display.innerText = `${m}:${sec < 10 ? '0' : ''}${sec}`;
+                    card.classList.remove('alarm-active');
                 }
             }
             if(alarm) alarmSound.play().catch(()=>{}); else { alarmSound.pause(); alarmSound.currentTime = 0; }
         }
 
+        function renderSnackInventory() {
+            document.getElementById('snackInventoryList').innerHTML = appData.snacks.map((s, idx) => `
+                <div class="snack-item">
+                    <span>${s.name} (₹${s.price})</span>
+                    <span>Stock: <b>${s.stock}</b> <button onclick="updateStock(${idx}, 1)" style="padding:2px 5px; margin-left:5px;">+</button></span>
+                </div>
+            `).join('') || '<div style="text-align:center; padding:10px; color:#444;">No snacks added.</div>';
+        }
+
+        function renderSnackButtons() {
+            document.getElementById('snackSelectArea').innerHTML = appData.snacks.map((s, idx) => `
+                <button class="btn-opt" onclick="addSnackToUnit(${idx})">+ ${s.name}</button>
+            `).join('');
+        }
+
+        function addSnackToUnit(idx) {
+            const snack = appData.snacks[idx];
+            if (snack.stock <= 0) return alert("Out of Stock!");
+            appData.activeSessions[activeUnitId].snackBill = (appData.activeSessions[activeUnitId].snackBill || 0) + snack.price;
+            snack.stock--;
+            updateDetailDisplay(); renderSnackInventory(); push();
+        }
+
+        function updateDetailDisplay() {
+            const s = appData.activeSessions[activeUnitId];
+            document.getElementById('detName').innerText = "UNIT 0" + activeUnitId + " - " + s.name;
+            document.getElementById('detRate').innerText = "₹" + s.rate;
+            document.getElementById('detSnacks').innerText = "₹" + (s.snackBill || 0);
+            document.getElementById('detGrandTotal').innerText = "₹" + (s.rate + (s.snackBill || 0));
+        }
+
+        function confirmCheckout() {
+            const s = appData.activeSessions[activeUnitId];
+            const total = s.rate + (s.snackBill || 0);
+            if(confirm(`Checkout ₹${total}?`)) {
+                appData.history.unshift({ unit: "U0"+activeUnitId, name: s.name, total });
+                appData.revenue += total;
+                delete appData.activeSessions[activeUnitId];
+                renderGrid(); renderTodayLog(); push(); closeModals();
+            }
+        }
+
         function addSnackType() {
             const name = prompt("Snack Name:");
-            const price = parseInt(prompt("Price:", "20"));
-            if (name && price) { appData.snacks.push({ name, price, stock: 10 }); push(); renderSnackInventory(); }
+            const price = parseInt(prompt("Price:"));
+            if(name && price) { appData.snacks.push({name, price, stock:10}); renderSnackInventory(); push(); }
         }
-        function updateSnackStock(idx, change) { appData.snacks[idx].stock += change; push(); renderSnackInventory(); }
-        function modifyTime(mins) {
-            const s = appData.activeSessions[activeUnitId];
-            const newMins = (s.totalDuration / 60000) + mins;
-            if(newMins < 1) return;
-            s.totalDuration = newMins * 60000; s.endTime = s.startTime + s.totalDuration;
-            s.rate = Math.round((s.hourlyRate / 60) * newMins);
-            updateDetailDisplay(); renderGrid(); push();
-        }
-        function deleteSession() { if(confirm("Delete?")) { delete appData.activeSessions[activeUnitId]; renderGrid(); push(); closeModals(); } }
+        function updateStock(idx, val) { appData.snacks[idx].stock += val; renderSnackInventory(); push(); }
         function renderTodayLog() {
-            const log = document.getElementById('todayLog');
-            log.innerHTML = appData.history.slice(0, 5).map(e => `<tr><td>${e.unit}</td><td>${e.name}</td><td style="color:var(--success)">₹${e.total}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;">None</td></tr>';
+            document.getElementById('todayLog').innerHTML = appData.history.slice(0,5).map(h => `<tr><td>${h.unit}</td><td>${h.name}</td><td>₹${h.total}</td></tr>`).join('');
         }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
     </script>
