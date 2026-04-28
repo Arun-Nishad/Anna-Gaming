@@ -3,29 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Gaming Pro v4.5</title>
+    <title>Anna Gaming Pro v5.0</title>
     <style>
-        :root { --bg: #050505; --card-bg: #0a0a0c; --accent: #00f2ff; --danger: #ff3344; --success: #00ff88; --text: #e0e0e0; --border: #1a1a1f; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        :root { 
+            --bg: #050505; 
+            --card-bg: #0a0a0c; 
+            --accent: #00f2ff; 
+            --danger: #ff3344; 
+            --success: #00ff88; 
+            --warning: #ffcc00;
+            --text: #e0e0e0; 
+            --border: #1a1a1f; 
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; user-select: none; }
+        
+        /* Layout */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 768px) { .dashboard-row { grid-template-columns: 1fr; } }
-        .card { border: 1px solid var(--border); padding: 20px; border-radius: 16px; background: var(--card-bg); cursor: pointer; transition: 0.3s; text-align: center; }
-        .card.active { border-color: var(--accent); background: #0d0d10; }
+
+        /* Cards */
+        .card { border: 1px solid var(--border); padding: 20px; border-radius: 16px; background: var(--card-bg); cursor: pointer; transition: 0.3s; text-align: center; position: relative; overflow: hidden; }
+        .card.active { border-color: var(--accent); background: #0d0d10; box-shadow: 0 0 15px rgba(0, 242, 255, 0.1); }
         .card.alarm-active { animation: flash-red 0.8s infinite; border-color: var(--danger); }
-        @keyframes flash-red { 0%, 100% { background: var(--card-bg); } 50% { background: #1a0505; } }
-        .timer { font-size: 2.5rem; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; }
-        .cust-name-tag { color: var(--accent); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; height: 1.2rem; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 25px; }
-        .modal-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; padding: 12px; transition: 0.2s; }
-        .btn-prime { background: var(--accent); color: #000; width: 100%; }
+        @keyframes flash-red { 0%, 100% { background: var(--card-bg); } 50% { background: #2a0505; } }
+
+        /* Typography */
+        .timer { font-size: 2.8rem; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; }
+        .timer.warning { color: var(--warning); }
+        .timer.critical { color: var(--danger); text-shadow: 0 0 10px rgba(255, 51, 68, 0.5); }
+        .cust-name-tag { color: var(--accent); font-weight: bold; font-size: 0.85rem; text-transform: uppercase; height: 1.2rem; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-bg); width: 95%; max-width: 450px; border-radius: 24px; border: 1px solid #333; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .modal-input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
+        
+        /* Buttons */
+        button { cursor: pointer; border: none; border-radius: 10px; font-weight: bold; padding: 12px; transition: 0.2s; font-family: inherit; }
+        .btn-prime { background: var(--accent); color: #000; width: 100%; font-size: 1rem; }
+        .btn-prime:active { transform: scale(0.98); }
         .btn-opt { background: #1a1a1f; color: var(--accent); border: 1px solid #333; margin: 2px; font-size: 0.7rem; }
-        .total-counter { background: rgba(0, 255, 136, 0.1); color: var(--success); padding: 8px 15px; border-radius: 8px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th, td { padding: 8px; border-bottom: 1px solid #1a1a1f; text-align: left; }
+        .btn-control { background: #1a1a1f; color: #fff; border: 1px solid #333; padding: 10px; font-size: 0.8rem; flex: 1; }
+        .btn-danger { background: rgba(255, 51, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        
+        .flex-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .total-counter { background: rgba(0, 255, 136, 0.1); color: var(--success); padding: 8px 15px; border-radius: 8px; font-weight: bold; border: 1px solid rgba(0, 255, 136, 0.2); }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px; border-bottom: 1px solid #1a1a1f; text-align: left; }
         .snack-item { display: flex; justify-content: space-between; padding: 10px; background: #000; margin-bottom: 5px; border-radius: 8px; border: 1px solid #222; }
     </style>
 </head>
@@ -33,10 +61,11 @@
 
     <div class="header">
         <div>
-            <h1 style="margin:0; font-size:1.2rem; color:var(--accent);">ANNA GAMING PRO</h1>
-            <div id="syncStatus" style="font-size:0.7rem;">● STARTING...</div>
+            <h1 style="margin:0; font-size:1.4rem; color:var(--accent); letter-spacing: 1px;">ANNA GAMING PRO</h1>
+            <div id="syncStatus" style="font-size:0.7rem;">● INITIALIZING...</div>
         </div>
-        <div style="text-align:right">
+        <div style="text-align:right; display: flex; align-items: center; gap: 10px;">
+            <button onclick="endOfDayReset()" style="padding: 5px 10px; font-size: 0.6rem; background: transparent; color: #555; border: 1px solid #333;">RESET DAY</button>
             <div class="total-counter">Total ₹<span id="dailyRevenue">0</span></div>
         </div>
     </div>
@@ -51,7 +80,7 @@
         <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3 style="margin:0; font-size:0.8rem; color:var(--success);">🍿 SNACK STOCK</h3>
-                <button onclick="addSnackType()" style="padding:4px 8px; font-size:0.6rem; background:var(--accent); color:#000;">+ ADD NEW</button>
+                <button onclick="addSnackType()" style="padding:4px 10px; font-size:0.6rem; background:var(--accent); color:#000;">+ ADD NEW</button>
             </div>
             <div id="snackInventoryList"></div>
         </div>
@@ -61,9 +90,9 @@
         <div class="modal-content">
             <h2 style="color:var(--accent); margin:0 0 15px 0;">START UNIT</h2>
             <input type="text" id="custName" class="modal-input" placeholder="Customer Name">
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1"><small>Mins</small><input type="number" id="startMins" class="modal-input" value="60"></div>
-                <div style="flex:1"><small>Rate ₹</small><input type="number" id="startRate" class="modal-input" value="150"></div>
+            <div class="flex-group">
+                <div style="flex:1"><small>Duration (Mins)</small><input type="number" id="startMins" class="modal-input" value="60"></div>
+                <div style="flex:1"><small>Rate (₹)</small><input type="number" id="startRate" class="modal-input" value="150"></div>
             </div>
             <button class="btn-prime" onclick="confirmStart()">START SESSION</button>
             <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CANCEL</button>
@@ -72,18 +101,31 @@
 
     <div class="modal-overlay" id="detailModal">
         <div class="modal-content">
-            <h2 id="detName" style="color:var(--accent); margin:0 0 15px 0;">UNIT</h2>
+            <h2 id="detName" style="color:var(--accent); margin:0 0 10px 0;">UNIT</h2>
+            
+            <div class="flex-group">
+                <button class="btn-control" onclick="adjustTime(30)">+30 Mins</button>
+                <button class="btn-control" onclick="adjustTime(-30)">-30 Mins</button>
+                <button class="btn-control" onclick="updateManualPrice()">Edit Price</button>
+            </div>
+
             <small style="color:#666;">ADD SNACKS:</small>
-            <div style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0 20px 0;" id="snackSelectArea"></div>
-            <div style="background:#000; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #222;">
-                <div style="display:flex; justify-content:space-between;"><span>Game:</span><span id="detRate">₹0</span></div>
-                <div style="display:flex; justify-content:space-between;"><span>Snacks:</span><span id="detSnacks" style="color:var(--accent)">₹0</span></div>
-                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.2rem; border-top:1px solid #333; margin-top:10px; padding-top:10px; color:var(--success);">
+            <div style="display:flex; flex-wrap:wrap; gap:5px; margin:5px 0 15px 0;" id="snackSelectArea"></div>
+            
+            <div style="background:#000; padding:15px; border-radius:15px; margin-bottom:15px; border:1px solid #222;">
+                <div style="display:flex; justify-content:space-between;"><span>Game Charges:</span><span id="detRate">₹0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Snack Bill:</span><span id="detSnacks" style="color:var(--accent)">₹0</span></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:1.4rem; border-top:1px solid #333; margin-top:10px; padding-top:10px; color:var(--success);">
                     <span>TOTAL:</span><span id="detGrandTotal">₹0</span>
                 </div>
             </div>
-            <button class="btn-prime" style="background:var(--danger); color:#fff;" onclick="confirmCheckout()">CHECKOUT</button>
-            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:10px;">CLOSE</button>
+
+            <button class="btn-prime" style="background:var(--success); color:#000;" onclick="confirmCheckout()">CHECKOUT & PRINT</button>
+            
+            <div class="flex-group" style="margin-top: 15px;">
+                <button class="btn-control btn-danger" onclick="deleteSession()">Delete Mistake</button>
+                <button class="btn-control" onclick="closeModals()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -91,39 +133,57 @@
         const SYNC_URL = "https://script.google.com/macros/s/AKfycbz9uCjqpaCDbCCnTxcKu_P6QDO_RaWLX3uOtHcj2-zFMgXR0Bk7ICrm9RkrcBrP6FcGbA/exec";
         const currentDayKey = new Date().toLocaleDateString('en-CA');
         const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg');
+        alarmSound.loop = true;
         
         let appData = { activeSessions: {}, revenue: 0, history: [], snacks: [] };
         let activeUnitId = null;
+        let isAudioUnlocked = false;
 
         function init() {
-            renderGrid(); // Draw empty units immediately
+            renderGrid();
             pull();
             setInterval(updateTickers, 1000);
-            setInterval(pull, 15000);
+            setInterval(pull, 20000); // Pull every 20s to sync
+            
+            // Audio Fix: Unlock audio on first click
+            document.body.addEventListener('click', () => {
+                if(!isAudioUnlocked) {
+                    alarmSound.play().then(() => {
+                        alarmSound.pause();
+                        isAudioUnlocked = true;
+                    });
+                }
+            }, { once: true });
         }
 
         async function pull() {
             try {
                 const res = await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}`);
                 const data = await res.json();
-                
-                // If data exists, use it. If not, we keep the empty appData structure.
                 if (data && data.activeSessions) {
                     appData = data;
                 } else {
-                    // First time for today? Push blank data to clear Sheets
-                    push();
+                    push(); // Initial save
                 }
-                
-                renderGrid();
-                renderTodayLog();
-                renderSnackInventory();
-                document.getElementById('syncStatus').innerText = "● ONLINE";
+                refreshUI();
+                document.getElementById('syncStatus').innerText = "● LIVE SYNC ACTIVE";
                 document.getElementById('syncStatus').style.color = "var(--success)";
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "● CONNECTED (NEW DAY)";
-                document.getElementById('syncStatus').style.color = "var(--accent)";
+                document.getElementById('syncStatus').innerText = "● OFFLINE MODE";
+                document.getElementById('syncStatus').style.color = "var(--warning)";
             }
+        }
+
+        async function push() {
+            const content = encodeURIComponent(JSON.stringify(appData));
+            fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
+        }
+
+        function refreshUI() {
+            renderGrid();
+            renderTodayLog();
+            renderSnackInventory();
+            document.getElementById('dailyRevenue').innerText = appData.revenue;
         }
 
         function renderGrid() {
@@ -134,12 +194,11 @@
                 html += `
                     <div class="card ${s ? 'active' : ''}" id="card-${id}" onclick="handleUnitClick(${id})">
                         <div style="font-size:0.7rem; color:#555; margin-bottom:5px;">UNIT 0${id}</div>
-                        <div class="cust-name-tag">${s ? s.name : 'AVAILABLE'}</div>
+                        <div class="cust-name-tag">${s ? s.name : 'VACANT'}</div>
                         <div class="timer" id="display-${id}">00:00</div>
                     </div>`;
             }
             container.innerHTML = html;
-            document.getElementById('dailyRevenue').innerText = appData.revenue;
         }
 
         function handleUnitClick(id) {
@@ -154,47 +213,92 @@
         }
 
         function confirmStart() {
-            const name = document.getElementById('custName').value.trim();
+            const name = document.getElementById('custName').value.trim() || "Guest";
             const mins = parseInt(document.getElementById('startMins').value);
             const rate = parseInt(document.getElementById('startRate').value);
-            if (!name) return;
+            
             appData.activeSessions[activeUnitId] = { 
-                name, startTime: Date.now(), endTime: Date.now() + (mins * 60000), 
-                totalDuration: mins * 60000, rate, hourlyRate: rate/(mins/60), snackBill: 0 
+                name, 
+                startTime: Date.now(), 
+                endTime: Date.now() + (mins * 60000), 
+                rate: rate,
+                hourlyRate: rate / (mins / 60),
+                snackBill: 0 
             };
+            
             document.getElementById('custName').value = "";
-            closeModals(); renderGrid(); push();
+            closeModals(); refreshUI(); push();
         }
 
-        async function push() {
-            const content = encodeURIComponent(JSON.stringify(appData));
-            await fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
+        function adjustTime(mins) {
+            const s = appData.activeSessions[activeUnitId];
+            s.endTime += (mins * 60000);
+            // Dynamic Pricing: Adjust total rate based on original hourly rate
+            const priceChange = (mins / 60) * s.hourlyRate;
+            s.rate = Math.max(0, s.rate + priceChange);
+            
+            updateDetailDisplay();
+            push();
+        }
+
+        function updateManualPrice() {
+            const current = appData.activeSessions[activeUnitId].rate;
+            const newVal = prompt("Edit Session Price (₹):", current);
+            if (newVal !== null && !isNaN(newVal)) {
+                appData.activeSessions[activeUnitId].rate = parseInt(newVal);
+                updateDetailDisplay();
+                push();
+            }
+        }
+
+        function deleteSession() {
+            if(confirm("DELETE SESSION? This cannot be undone and no money will be recorded.")) {
+                delete appData.activeSessions[activeUnitId];
+                closeModals(); refreshUI(); push();
+            }
         }
 
         function updateTickers() {
-            let alarm = false;
+            let anyAlarm = false;
             for (let id in appData.activeSessions) {
                 const s = appData.activeSessions[id];
                 const diff = s.endTime - Date.now();
                 const display = document.getElementById(`display-${id}`);
                 const card = document.getElementById(`card-${id}`);
                 if (!display) continue;
-                if (diff <= 0) { display.innerText = "00:00"; card.classList.add('alarm-active'); alarm = true; } 
-                else {
+
+                if (diff <= 0) {
+                    display.innerText = "00:00";
+                    display.className = "timer critical";
+                    card.classList.add('alarm-active');
+                    anyAlarm = true;
+                } else {
                     const m = Math.floor(diff / 60000);
                     const sec = Math.floor((diff % 60000) / 1000);
                     display.innerText = `${m}:${sec < 10 ? '0' : ''}${sec}`;
                     card.classList.remove('alarm-active');
+                    
+                    if (m < 5) display.className = "timer critical";
+                    else if (m < 10) display.className = "timer warning";
+                    else display.className = "timer";
                 }
             }
-            if(alarm) alarmSound.play().catch(()=>{}); else { alarmSound.pause(); alarmSound.currentTime = 0; }
+            
+            // Audio Control
+            if (anyAlarm && isAudioUnlocked) {
+                alarmSound.play().catch(() => {});
+            } else {
+                alarmSound.pause();
+                alarmSound.currentTime = 0;
+            }
         }
 
+        // Snack Logic
         function renderSnackInventory() {
             document.getElementById('snackInventoryList').innerHTML = appData.snacks.map((s, idx) => `
                 <div class="snack-item">
                     <span>${s.name} (₹${s.price})</span>
-                    <span>Stock: <b>${s.stock}</b> <button onclick="updateStock(${idx}, 1)" style="padding:2px 5px; margin-left:5px;">+</button></span>
+                    <span>Stock: <b>${s.stock}</b> <button onclick="updateStock(${idx}, 1)" style="padding:2px 8px; margin-left:5px; background:var(--success); color:#000;">+</button></span>
                 </div>
             `).join('') || '<div style="text-align:center; padding:10px; color:#444;">No snacks added.</div>';
         }
@@ -208,7 +312,7 @@
         function addSnackToUnit(idx) {
             const snack = appData.snacks[idx];
             if (snack.stock <= 0) return alert("Out of Stock!");
-            appData.activeSessions[activeUnitId].snackBill = (appData.activeSessions[activeUnitId].snackBill || 0) + snack.price;
+            appData.activeSessions[activeUnitId].snackBill += snack.price;
             snack.stock--;
             updateDetailDisplay(); renderSnackInventory(); push();
         }
@@ -216,32 +320,62 @@
         function updateDetailDisplay() {
             const s = appData.activeSessions[activeUnitId];
             document.getElementById('detName').innerText = "UNIT 0" + activeUnitId + " - " + s.name;
-            document.getElementById('detRate').innerText = "₹" + s.rate;
-            document.getElementById('detSnacks').innerText = "₹" + (s.snackBill || 0);
-            document.getElementById('detGrandTotal').innerText = "₹" + (s.rate + (s.snackBill || 0));
+            document.getElementById('detRate').innerText = "₹" + Math.round(s.rate);
+            document.getElementById('detSnacks').innerText = "₹" + s.snackBill;
+            document.getElementById('detGrandTotal').innerText = "₹" + Math.round(s.rate + s.snackBill);
         }
 
         function confirmCheckout() {
             const s = appData.activeSessions[activeUnitId];
-            const total = s.rate + (s.snackBill || 0);
-            if(confirm(`Checkout ₹${total}?`)) {
-                appData.history.unshift({ unit: "U0"+activeUnitId, name: s.name, total });
+            const total = Math.round(s.rate + s.snackBill);
+            if(confirm(`Checkout ₹${total} for ${s.name}?`)) {
+                appData.history.unshift({ 
+                    unit: "U0"+activeUnitId, 
+                    name: s.name, 
+                    total, 
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+                });
                 appData.revenue += total;
                 delete appData.activeSessions[activeUnitId];
-                renderGrid(); renderTodayLog(); push(); closeModals();
+                closeModals(); refreshUI(); push();
             }
         }
 
         function addSnackType() {
             const name = prompt("Snack Name:");
-            const price = parseInt(prompt("Price:"));
-            if(name && price) { appData.snacks.push({name, price, stock:10}); renderSnackInventory(); push(); }
+            const price = parseInt(prompt("Price (₹):"));
+            if(name && price) { 
+                appData.snacks.push({name, price, stock: 20}); 
+                renderSnackInventory(); push(); 
+            }
         }
-        function updateStock(idx, val) { appData.snacks[idx].stock += val; renderSnackInventory(); push(); }
+
+        function updateStock(idx, val) { 
+            appData.snacks[idx].stock += val; 
+            renderSnackInventory(); push(); 
+        }
+
         function renderTodayLog() {
-            document.getElementById('todayLog').innerHTML = appData.history.slice(0,5).map(h => `<tr><td>${h.unit}</td><td>${h.name}</td><td>₹${h.total}</td></tr>`).join('');
+            document.getElementById('todayLog').innerHTML = appData.history.slice(0,8).map(h => `
+                <tr>
+                    <td><span style="color:var(--accent)">${h.unit}</span></td>
+                    <td>${h.name} <br><small style="color:#555">${h.time}</small></td>
+                    <td style="color:var(--success); font-weight:bold;">₹${h.total}</td>
+                </tr>
+            `).join('');
         }
-        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
+
+        function endOfDayReset() {
+            if(confirm("DANGER: This will delete today's revenue and logs. Continue?")) {
+                appData.revenue = 0;
+                appData.history = [];
+                refreshUI(); push();
+            }
+        }
+
+        function closeModals() { 
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); 
+        }
     </script>
 </body>
 </html>
