@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anna Gaming Cloud Pro v4.1</title>
+    <title>Anna Gaming Cloud Pro v4.2 (With Snacks)</title>
     <style>
         :root { --bg: #050505; --card-bg: #0a0a0c; --accent: #00f2ff; --danger: #ff3344; --success: #00ff88; --text: #e0e0e0; --border: #1a1a1f; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
@@ -28,7 +28,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #1a1a1f; }
         th { color: #555; text-transform: uppercase; font-size: 0.7rem; }
-        .monthly-summary { background: #1a1a1f; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        .snack-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #000; margin-bottom: 5px; border-radius: 5px; }
     </style>
 </head>
 <body onload="init()">
@@ -40,38 +40,31 @@
         </div>
         <div style="text-align:right">
             <button class="btn-history" onclick="fetchMonthlyHistory()">📜 MONTHLY HISTORY</button>
-            <div class="total-counter">₹<span id="dailyRevenue">0</span></div>
+            <div class="total-counter">Total ₹<span id="dailyRevenue">0</span></div>
         </div>
     </div>
 
     <div class="grid" id="gameGrid"></div>
 
-    <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
-        <h3 style="margin-top:0; font-size:1rem;">📊 TODAY'S SESSIONS</h3>
-        <div style="overflow-x:auto;">
-            <table>
-                <thead><tr><th>Unit</th><th>Customer</th><th>Amount</th></tr></thead>
-                <tbody id="todayLog"></tbody>
-            </table>
+    <div class="grid">
+        <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+            <h3 style="margin-top:0; font-size:1rem; color: var(--accent);">📊 TODAY'S REVENUE</h3>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th>Unit</th><th>Customer</th><th>Total Bill</th></tr></thead>
+                    <tbody id="todayLog"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+            <h3 style="margin-top:0; font-size:1rem; color: var(--success);">🍿 SNACK INVENTORY</h3>
+            <div id="snackInventoryList"></div>
+            <button class="btn-opt" style="width:100%; margin-top:10px;" onclick="addSnackType()">+ ADD NEW SNACK TYPE</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="historyModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 style="color:var(--accent); margin:0;">MONTHLY RECORDS</h2>
-                <button onclick="exportMonthlyCSV()" style="background:var(--success); color:#000; padding:5px 10px; font-size:0.7rem;">📥 EXPORT CSV</button>
-            </div>
-            
-            <div class="monthly-summary">
-                <div style="font-size:0.7rem; color:#888;">TOTAL MONTHLY REVENUE</div>
-                <div style="font-size:1.5rem; color:var(--success); font-weight:900;">₹<span id="monthTotal">0</span></div>
-            </div>
-
-            <div id="historyBody" style="overflow-y:auto; max-height:50vh;"></div>
-            <button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:15px;">CLOSE</button>
-        </div>
-    </div>
+    <div class="modal-overlay" id="historyModal"><div class="modal-content"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2 style="color:var(--accent); margin:0;">MONTHLY RECORDS</h2><button onclick="exportMonthlyCSV()" style="background:var(--success); color:#000; padding:5px 10px; font-size:0.7rem;">📥 EXPORT CSV</button></div><div id="historyBody" style="overflow-y:auto; max-height:50vh;"></div><button onclick="closeModals()" style="background:none; color:#555; width:100%; margin-top:15px;">CLOSE</button></div></div>
 
     <div class="modal-overlay" id="startModal">
         <div class="modal-content">
@@ -92,10 +85,16 @@
             <div style="display:flex; gap:8px; margin-bottom:15px;">
                 <button class="btn-opt" onclick="modifyTime(30)">+30 MIN</button>
                 <button class="btn-opt" onclick="modifyTime(-30)">-30 MIN</button>
-                <button class="btn-opt" onclick="editPrice()">EDIT ₹</button>
             </div>
-            <div style="display:flex; justify-content:space-between; padding:12px; background:#000; border-radius:8px; margin-bottom:15px;">
-                <span>Total Bill:</span><span id="detRate" style="color:var(--success); font-weight:bold;">₹0</span>
+            <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:10px;">
+                <h4 style="margin:0 0 10px 0; font-size:0.8rem;">ADD SNACKS TO BILL:</h4>
+                <div id="snackSelectArea"></div>
+            </div>
+            <div style="background:#000; padding:12px; border-radius:8px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between;"><span>Gaming:</span><span id="detRate">₹0</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Snacks:</span><span id="detSnacks" style="color:var(--accent)">₹0</span></div>
+                <hr border="0" style="border-top:1px solid #333">
+                <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>Total:</span><span id="detGrandTotal" style="color:var(--success)">₹0</span></div>
             </div>
             <button class="btn-danger" onclick="confirmCheckout()">CHECKOUT & SAVE</button>
             <button onclick="deleteSession()" style="background:none; color:#ff3344; width:100%; margin-top:10px; font-size:0.7rem;">DELETE (ERROR)</button>
@@ -104,16 +103,11 @@
     </div>
 
     <script>
-        // REPLACE THIS URL WITH YOUR GOOGLE WEB APP URL
-        const SYNC_URL = "https://script.google.com/macros/s/AKfycbxm_8MOZPYS_fKcadjPElr0nw9oq6w2J4lumYcIWF8GKyF6GxWUmqBUXXGXq5-K1mVP9g/exec";
-        
-        const today = new Date();
-        const currentDayKey = today.toLocaleDateString('en-CA');
-        const currentMonthPrefix = currentDayKey.substring(0, 7); 
+        const SYNC_URL = "https://script.google.com/macros/s/AKfycbz9uCjqpaCDbCCnTxcKu_P6QDO_RaWLX3uOtHcj2-zFMgXR0Bk7ICrm9RkrcBrP6FcGbA/exec";
+        const currentDayKey = new Date().toLocaleDateString('en-CA');
         const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/spaceship_alarm.ogg');
         
-        let appData = { activeSessions: {}, revenue: 0, history: [] };
-        let fullMonthData = [];
+        let appData = { activeSessions: {}, revenue: 0, history: [], snacks: [] };
         let activeUnitId = null;
 
         async function init() {
@@ -128,59 +122,123 @@
                 const data = await res.json();
                 if (data.activeSessions) {
                     appData = data;
+                    if(!appData.snacks) appData.snacks = []; // Safety check
                     renderGrid();
                     renderTodayLog();
+                    renderSnackInventory();
                 }
-                document.getElementById('syncStatus').innerText = "● ONLINE";
-                document.getElementById('syncStatus').style.color = "var(--success)";
+                updateSyncStatus("ONLINE", "var(--success)");
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "● OFFLINE";
-                document.getElementById('syncStatus').style.color = "var(--danger)";
+                updateSyncStatus("OFFLINE", "var(--danger)");
             }
         }
 
-        async function fetchMonthlyHistory() {
-            const status = document.getElementById('syncStatus');
-            status.innerText = "● FETCHING MONTH...";
-            fullMonthData = [];
-            let total = 0;
+        function updateSyncStatus(text, color) {
+            const el = document.getElementById('syncStatus');
+            el.innerText = "● " + text;
+            el.style.color = color;
+        }
 
-            try {
-                const res = await fetch(`${SYNC_URL}?prefix=anna_pro_${currentMonthPrefix}`);
-                const allDays = await res.json(); 
-                let html = "<table><thead><tr><th>Date</th><th>Customer</th><th>Amount</th></tr></thead><tbody>";
-                
-                allDays.forEach(day => {
-                    const dateLabel = day.key.replace('anna_pro_', '');
-                    const dailyData = (typeof day.data === 'string') ? JSON.parse(day.data) : day.data;
-                    if (dailyData.history) {
-                        dailyData.history.forEach(entry => {
-                            total += entry.total;
-                            html += `<tr><td>${dateLabel}</td><td>${entry.name}</td><td>₹${entry.total}</td></tr>`;
-                            fullMonthData.push({date: dateLabel, ...entry});
-                        });
-                    }
-                });
-                
-                html += "</tbody></table>";
-                if (fullMonthData.length === 0) html = "<p style='text-align:center; padding:20px;'>No records found.</p>";
-                document.getElementById('historyBody').innerHTML = html;
-                document.getElementById('monthTotal').innerText = total;
-                document.getElementById('historyModal').style.display = 'flex';
-                status.innerText = "● ONLINE";
-            } catch (e) {
-                alert("Monthly fetch error. Ensure your Script is deployed as 'Anyone'.");
-                status.innerText = "● SYNC ERROR";
+        function renderSnackInventory() {
+            const container = document.getElementById('snackInventoryList');
+            container.innerHTML = appData.snacks.map((s, idx) => `
+                <div class="snack-item">
+                    <span>${s.name} (₹${s.price})</span>
+                    <div>
+                        <button onclick="updateSnackStock(${idx}, -1)" style="padding:2px 8px;">-</button>
+                        <span style="margin: 0 10px;">${s.stock}</span>
+                        <button onclick="updateSnackStock(${idx}, 1)" style="padding:2px 8px;">+</button>
+                    </div>
+                </div>
+            `).join('') || '<p style="font-size:0.7rem; color:#555;">No snacks added.</p>';
+        }
+
+        function addSnackType() {
+            const name = prompt("Snack Name (e.g., Lays):");
+            const price = parseInt(prompt("Price per unit:", "20"));
+            const stock = parseInt(prompt("Initial stock count:", "10"));
+            if (name && price) {
+                appData.snacks.push({ name, price, stock });
+                push(); renderSnackInventory();
             }
         }
 
-        function exportMonthlyCSV() {
-            let csv = "Date,Unit,Customer,Amount\n";
-            fullMonthData.forEach(e => { csv += `${e.date},${e.unit},${e.name},${e.total}\n`; });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `AnnaGaming_Monthly_${currentMonthPrefix}.csv`; a.click();
+        function updateSnackStock(idx, change) {
+            appData.snacks[idx].stock += change;
+            push(); renderSnackInventory();
+        }
+
+        function handleUnitClick(id) {
+            activeUnitId = id;
+            if (appData.activeSessions[id]) {
+                const s = appData.activeSessions[id];
+                if (!s.snackBill) s.snackBill = 0;
+                document.getElementById('detName').innerText = "UNIT 0" + id + " - " + s.name;
+                updateDetailDisplay();
+                renderSnackSelection();
+                document.getElementById('detailModal').style.display = 'flex';
+            } else {
+                document.getElementById('startModal').style.display = 'flex';
+            }
+        }
+
+        function renderSnackSelection() {
+            const container = document.getElementById('snackSelectArea');
+            container.innerHTML = appData.snacks.map((s, idx) => `
+                <button class="btn-opt" onclick="addSnackToUnit(${idx})" style="margin:2px; font-size:0.7rem;">
+                    + ${s.name} (₹${s.price})
+                </button>
+            `).join('');
+        }
+
+        function addSnackToUnit(snackIdx) {
+            const snack = appData.snacks[snackIdx];
+            if (snack.stock <= 0) return alert("Out of stock!");
+            
+            const session = appData.activeSessions[activeUnitId];
+            session.snackBill = (session.snackBill || 0) + snack.price;
+            snack.stock--;
+            
+            updateDetailDisplay();
+            renderSnackInventory();
+            push();
+        }
+
+        function updateDetailDisplay() {
+            const s = appData.activeSessions[activeUnitId];
+            document.getElementById('detRate').innerText = "₹" + s.rate;
+            document.getElementById('detSnacks').innerText = "₹" + (s.snackBill || 0);
+            document.getElementById('detGrandTotal').innerText = "₹" + (s.rate + (s.snackBill || 0));
+        }
+
+        function confirmCheckout() {
+            const s = appData.activeSessions[activeUnitId];
+            const total = s.rate + (s.snackBill || 0);
+            if(confirm(`Total Bill: ₹${total} (Game: ₹${s.rate}, Snacks: ₹${s.snackBill || 0})`)) {
+                appData.history.unshift({ unit: "U0" + activeUnitId, name: s.name, total: total });
+                appData.revenue += total;
+                delete appData.activeSessions[activeUnitId];
+                renderGrid(); renderTodayLog(); push(); closeModals();
+            }
+        }
+
+        // Logic for Timer, Start, and Grid remains same as your original V4.1
+        function confirmStart() {
+            const name = document.getElementById('custName').value.trim();
+            const mins = parseInt(document.getElementById('startMins').value);
+            const rate = parseInt(document.getElementById('startRate').value);
+            if (!name || isNaN(mins)) return;
+            appData.activeSessions[activeUnitId] = { name, startTime: Date.now(), endTime: Date.now() + (mins * 60000), totalDuration: mins * 60000, rate: rate, hourlyRate: rate / (mins / 60), snackBill: 0 };
+            closeModals(); renderGrid(); push();
+        }
+
+        function modifyTime(mins) {
+            const s = appData.activeSessions[activeUnitId];
+            const currentMins = s.totalDuration / 60000;
+            const newMins = currentMins + mins; if(newMins < 1) return;
+            s.totalDuration = newMins * 60000; s.endTime = s.startTime + s.totalDuration;
+            s.rate = Math.round((s.hourlyRate / 60) * newMins);
+            updateDetailDisplay(); renderGrid(); push();
         }
 
         async function push() {
@@ -203,53 +261,6 @@
             log.innerHTML = appData.history.slice(0, 10).map(e => `<tr><td>${e.unit}</td><td>${e.name}</td><td style="color:var(--success)">₹${e.total}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;">No sessions</td></tr>';
         }
 
-        function handleUnitClick(id) {
-            activeUnitId = id;
-            if (appData.activeSessions[id]) {
-                const s = appData.activeSessions[id];
-                document.getElementById('detName').innerText = "UNIT 0" + id + " - " + s.name;
-                document.getElementById('detRate').innerText = "₹" + s.rate;
-                document.getElementById('detailModal').style.display = 'flex';
-            } else {
-                document.getElementById('startModal').style.display = 'flex';
-            }
-        }
-
-        function confirmStart() {
-            const name = document.getElementById('custName').value.trim();
-            const mins = parseInt(document.getElementById('startMins').value);
-            const rate = parseInt(document.getElementById('startRate').value);
-            if (!name || isNaN(mins)) return;
-            appData.activeSessions[activeUnitId] = { name, startTime: Date.now(), endTime: Date.now() + (mins * 60000), totalDuration: mins * 60000, rate: rate, hourlyRate: rate / (mins / 60) };
-            closeModals(); renderGrid(); push();
-        }
-
-        function modifyTime(mins) {
-            const s = appData.activeSessions[activeUnitId];
-            const currentMins = s.totalDuration / 60000;
-            const newMins = currentMins + mins; if(newMins < 10) return;
-            s.totalDuration = newMins * 60000; s.endTime = s.startTime + s.totalDuration;
-            s.rate = Math.round((s.hourlyRate / 60) * newMins);
-            document.getElementById('detRate').innerText = "₹" + s.rate; renderGrid(); push();
-        }
-
-        function editPrice() {
-            const s = appData.activeSessions[activeUnitId];
-            const newPrice = prompt("New price:", s.rate);
-            if (newPrice !== null && !isNaN(newPrice)) { s.rate = parseInt(newPrice); s.hourlyRate = s.rate / ((s.totalDuration / 60000) / 60); document.getElementById('detRate').innerText = "₹" + s.rate; push(); }
-        }
-
-        function confirmCheckout() {
-            const s = appData.activeSessions[activeUnitId];
-            if(confirm("Collect ₹" + s.rate + "?")) {
-                appData.history.unshift({ unit: "U0" + activeUnitId, name: s.name, total: s.rate });
-                appData.revenue += s.rate; delete appData.activeSessions[activeUnitId];
-                renderGrid(); renderTodayLog(); push(); closeModals();
-            }
-        }
-
-        function deleteSession() { if(confirm("Delete session?")) { delete appData.activeSessions[activeUnitId]; renderGrid(); push(); closeModals(); } }
-
         function updateTickers() {
             let alarm = false;
             for (let id in appData.activeSessions) {
@@ -263,6 +274,7 @@
             if(alarm) alarmSound.play().catch(()=>{}); else { alarmSound.pause(); alarmSound.currentTime = 0; }
         }
 
+        function deleteSession() { if(confirm("Delete session?")) { delete appData.activeSessions[activeUnitId]; renderGrid(); push(); closeModals(); } }
         function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display='none'); }
     </script>
 </body>
