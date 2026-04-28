@@ -65,6 +65,7 @@
             <div id="syncStatus" style="font-size:0.7rem;">● INITIALIZING...</div>
         </div>
         <div style="text-align:right; display: flex; align-items: center; gap: 10px;">
+            <button onclick="openHistory()" style="padding: 5px 10px; font-size: 0.6rem; background: var(--accent); color: #000; border: none;">📜 HISTORY</button>
             <button onclick="endOfDayReset()" style="padding: 5px 10px; font-size: 0.6rem; background: transparent; color: #555; border: 1px solid #333;">RESET DAY</button>
             <div class="total-counter">Total ₹<span id="dailyRevenue">0</span></div>
         </div>
@@ -129,6 +130,26 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="color:var(--accent); margin:0;">📜 60-DAY LOGS</h2>
+                <button onclick="downloadExcel()" style="background:var(--success); color:#000; padding:8px 15px; font-size:0.8rem;">📥 EXPORT EXCEL</button>
+            </div>
+            <table style="width:100%;">
+                <thead>
+                    <tr style="color:var(--accent); border-bottom:2px solid #333;">
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+            <button class="btn-prime" onclick="closeModals()" style="margin-top:20px; background:#333; color:#fff;">CLOSE</button>
+        </div>
+    </div>
+
     <script>
         const SYNC_URL = "https://script.google.com/macros/s/AKfycbz9uCjqpaCDbCCnTxcKu_P6QDO_RaWLX3uOtHcj2-zFMgXR0Bk7ICrm9RkrcBrP6FcGbA/exec";
         const currentDayKey = new Date().toLocaleDateString('en-CA');
@@ -143,9 +164,8 @@
             renderGrid();
             pull();
             setInterval(updateTickers, 1000);
-            setInterval(pull, 20000); // Pull every 20s to sync
+            setInterval(pull, 20000); 
             
-            // Audio Fix: Unlock audio on first click
             document.body.addEventListener('click', () => {
                 if(!isAudioUnlocked) {
                     alarmSound.play().then(() => {
@@ -163,7 +183,7 @@
                 if (data && data.activeSessions) {
                     appData = data;
                 } else {
-                    push(); // Initial save
+                    push(); 
                 }
                 refreshUI();
                 document.getElementById('syncStatus').innerText = "● LIVE SYNC ACTIVE";
@@ -175,8 +195,9 @@
         }
 
         async function push() {
-            const content = encodeURIComponent(JSON.stringify(appData));
-            fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${content}`);
+            const content = JSON.stringify(appData);
+            // Using POST via fetch if your script handles it, otherwise GET with encoded content
+            fetch(`${SYNC_URL}?key=anna_pro_${currentDayKey}&content=${encodeURIComponent(content)}`);
         }
 
         function refreshUI() {
@@ -233,10 +254,8 @@
         function adjustTime(mins) {
             const s = appData.activeSessions[activeUnitId];
             s.endTime += (mins * 60000);
-            // Dynamic Pricing: Adjust total rate based on original hourly rate
             const priceChange = (mins / 60) * s.hourlyRate;
             s.rate = Math.max(0, s.rate + priceChange);
-            
             updateDetailDisplay();
             push();
         }
@@ -252,7 +271,7 @@
         }
 
         function deleteSession() {
-            if(confirm("DELETE SESSION? This cannot be undone and no money will be recorded.")) {
+            if(confirm("DELETE SESSION? This cannot be undone.")) {
                 delete appData.activeSessions[activeUnitId];
                 closeModals(); refreshUI(); push();
             }
@@ -277,14 +296,11 @@
                     const sec = Math.floor((diff % 60000) / 1000);
                     display.innerText = `${m}:${sec < 10 ? '0' : ''}${sec}`;
                     card.classList.remove('alarm-active');
-                    
                     if (m < 5) display.className = "timer critical";
                     else if (m < 10) display.className = "timer warning";
                     else display.className = "timer";
                 }
             }
-            
-            // Audio Control
             if (anyAlarm && isAudioUnlocked) {
                 alarmSound.play().catch(() => {});
             } else {
@@ -293,14 +309,60 @@
             }
         }
 
-        // Snack Logic
+        // --- HISTORY & EXCEL LOGIC ---
+
+        async function openHistory() {
+            const body = document.getElementById('historyBody');
+            body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Fetching History...</td></tr>";
+            document.getElementById('historyModal').style.display = 'flex';
+
+            try {
+                const res = await fetch(`${SYNC_URL}?action=getFullHistory`);
+                const fullHistory = await res.json();
+                
+                if (fullHistory.length === 0) {
+                    body.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No history found.</td></tr>";
+                } else {
+                    body.innerHTML = fullHistory.map(h => `
+                        <tr>
+                            <td><small>${h.date}</small></td>
+                            <td>${h.name}</td>
+                            <td style="color:var(--success)">₹${h.total}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                body.innerHTML = "<tr><td colspan='3' style='color:var(--danger); text-align:center;'>Failed to load. Check Sync URL.</td></tr>";
+            }
+        }
+
+        function downloadExcel() {
+            const table = document.getElementById('historyBody');
+            const rows = table.querySelectorAll('tr');
+            let csv = "Date,Customer Name,Total Amount (INR)\n";
+            
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                const data = Array.from(cols).map(c => c.innerText.replace('₹', ''));
+                csv += data.join(",") + "\n";
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Anna_Gaming_History_${new Date().toLocaleDateString()}.csv`);
+            a.click();
+        }
+
+        // --- SNACK LOGIC ---
         function renderSnackInventory() {
             document.getElementById('snackInventoryList').innerHTML = appData.snacks.map((s, idx) => `
                 <div class="snack-item">
                     <span>${s.name} (₹${s.price})</span>
                     <span>Stock: <b>${s.stock}</b> <button onclick="updateStock(${idx}, 1)" style="padding:2px 8px; margin-left:5px; background:var(--success); color:#000;">+</button></span>
                 </div>
-            `).join('') || '<div style="text-align:center; padding:10px; color:#444;">No snacks added.</div>';
+            `).join('') || '<div style="text-align:center; padding:10px; color:#444;">No snacks.</div>';
         }
 
         function renderSnackButtons() {
@@ -366,7 +428,8 @@
         }
 
         function endOfDayReset() {
-            if(confirm("DANGER: This will delete today's revenue and logs. Continue?")) {
+            const code = prompt("To RESET ALL DATA for today, type 'RESET':");
+            if(code === "RESET") {
                 appData.revenue = 0;
                 appData.history = [];
                 refreshUI(); push();
